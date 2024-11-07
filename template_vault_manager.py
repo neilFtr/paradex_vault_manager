@@ -34,16 +34,15 @@ def build_order(config: ApiConfig, order_type: OrderType, order_side: OrderSide,
 
 
 async def main(config: ApiConfig,target_btc_expo:Decimal) -> None:
-    # Initialize Ethereum account
     #This private key is your ETH wallet private key : 
     #That private key can be exported from your ETH coinbase wallet (L1)
     _, eth_account = get_l1_eth_account("YOUR_ETH_L1_PRIVATE_KEY")
 
-    #When connected on your paradex account and logged in the UI
+    #When connected on your paradex account AS VAULT MANAGER and logged in the UI AS VAULT MANAGER
     #You can click your account icon on the top right corner
     #This should offer you 3 buttons :  "wallet", "switch account", "signout"
     #When you click on wallet, you'll get a popup on the paradex ui showing you 
-    #1) the public key of the vault manager account (Paradex L2 account)
+    #1) the public key of the vault manager account (Paradex L2 account with the name of your vault)
     #2) an icon to copy past the private key of this account (Paradex L2 account)
     config.paradex_account, config.paradex_account_private_key = "YOUR_VAULT_L2_ACCOUNT_PUBLIC_KEY","YOUR_PARADEX_L2_PRIVATE_KEY"
     
@@ -76,10 +75,11 @@ async def main(config: ApiConfig,target_btc_expo:Decimal) -> None:
     askk=Decimal(data["ask"])
     #Calculate expected position in BTC
     expected_position=current_balance*float(target_btc_expo)*50/float(data["bid"])
+    #Calculate amount of the order to emit
     amount=int((expected_position-current_position)*100)/100
     if abs(amount)<0.002:
         amount=0
-        
+    
     amount=Decimal(str(amount))
     # Cancel all orders
     await cancel_all_orders_payload(config.paradex_http_url, paradex_jwt)
